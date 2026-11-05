@@ -1,4 +1,4 @@
-# 👾 Bug - Hunter
+# 👾 Bug Hunter
 
 Kanban web para dar visibilidade aos problemas reportados por clientes e já validados pelo time de Suporte, organizados por assunto e acompanhados até a resolução.
 
