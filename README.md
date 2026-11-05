@@ -1,81 +1,86 @@
-# 🎫 ITSM Kanban — Multi-usuário
+# 👾 Bug - Hunter
 
-Board Kanban compartilhado para visualização de tickets do Intercom.
-Todos os colegas veem o mesmo board em tempo real.
+Kanban web para dar visibilidade aos problemas reportados por clientes e já validados pelo time de Suporte, organizados por assunto e acompanhados até a resolução.
 
-## Arquitetura
+> Projeto pessoal, desenvolvido por **Gabriel da Maia** (time de Suporte).
 
-```
-GitHub Pages (index.html) ──HTTPS──> Supabase (PostgreSQL + Real-time)
-```
+---
 
-## Setup em 4 passos
+## 📌 Sobre
 
-### 1. Criar conta no Supabase (grátis)
+O **Bug - Hunter** nasceu para responder a uma pergunta simples: *"esse problema já é conhecido?"*
 
-1. Acesse [supabase.com](https://supabase.com) → **Start your project**
-2. Crie um novo projeto (nome: `itsm-kanban`, senha forte)
-3. Aguarde ~2 min para o banco inicializar
+Os tickets que passam pela triagem do Suporte e são validados como falhas reais entram no board, agrupados por tema (Financeiro, Pedidos, Impressão, Integrações, etc.). Assim, qualquer pessoa autorizada consegue consultar o que está em análise sem precisar abrir um novo chamado.
 
-### 2. Criar as tabelas
+## ✨ Funcionalidades
 
-1. No painel do Supabase → **SQL Editor** → **New query**
-2. Cole o conteúdo do arquivo `setup.sql`
-3. Clique em **Run** (▶)
+- **Board por assunto**: colunas temáticas com cor própria; o tema é detectado automaticamente a partir do título do ticket.
+- **Busca rápida**: filtro por título ou ID.
+- **Detalhes do ticket**: modal com informações do card.
+- **Arrastar e soltar**: mover cards entre colunas (perfil com permissão de edição).
+- **Importação via JSON**: com revisão antes de confirmar, evitando duplicidades.
+  - ticket já no board → ignorado
+  - ticket já arquivado que voltou → aviso para decisão manual
+  - título idêntico a um problema antigo → aviso de possível recorrência
+- **Arquivados**: histórico de tickets resolvidos, com opção de restaurar.
+- **Última atualização**: rodapé com data e horário da última vez que o board foi alimentado.
+- **Modal explicativo**: botão ao lado do título que apresenta o projeto e como usá-lo.
+- **Controle de acesso**: login e permissões diferentes para quem consulta e para quem edita.
 
-### 3. Subir o app no GitHub Pages
+## 🧱 Stack
 
-```bash
-git init
-git add index.html setup.sql README.md
-git commit -m "feat: ITSM Kanban multi-usuario"
-gh repo create itsm-kanban --public --push --source=.
-```
+| Camada | Tecnologia |
+|---|---|
+| Front-end | HTML, CSS e JavaScript puro (arquivo único, sem build) |
+| Backend / banco | [Supabase](https://supabase.com) (PostgreSQL + Auth + Realtime) |
+| Hospedagem | GitHub Pages |
 
-Em GitHub: **Settings → Pages → Branch: main → Save**
-URL final: `https://SEU_USUARIO.github.io/itsm-kanban`
-
-### 4. Configurar as credenciais (primeira vez)
-
-1. Abra o app no browser
-2. A tela de configuração aparece automaticamente
-3. No Supabase: **Project Settings → API**
-   - Copie `Project URL`
-   - Copie `anon public` key
-4. Cole no app → **Conectar**
-
-A configuração fica salva no navegador de cada colega.
-Cada pessoa faz isso uma vez ao abrir o app pela primeira vez.
-
-## Como usar
-
-| Ação | Como |
-|------|------|
-| Importar tickets | ⬆ Importar JSON → selecionar arquivo |
-| Ver detalhes de um ticket | Clicar no card |
-| Arquivar ticket resolvido | ✕ no card ou botão "Arquivar" no detalhe |
-| Mover entre colunas | Arrastar o card |
-| Buscar | Campo de busca no topo |
-| Ver histórico | 📚 Histórico |
-| Sincronização ao vivo | Automática — ponto verde = ao vivo |
-
-## Lógica de importação
+## 🏗️ Arquitetura
 
 ```
-Para cada ticket do JSON:
-  ├── ID já está no board?          → Ignorado
-  ├── ID foi arquivado antes?       → ⚠ Aviso: "ticket voltou"
-  ├── Título igual a arquivado?     → ⚠ Aviso: "problema recorrente"
-  └── Completamente novo?           → ✅ Adicionado automaticamente
+GitHub Pages (index.html) ──HTTPS──> Supabase (PostgreSQL + Auth + Realtime)
 ```
 
-## Plano gratuito Supabase
+## 🚀 Como rodar o seu próprio
 
-| Recurso | Limite free |
-|---------|-------------|
-| Banco de dados | 500 MB |
-| Usuários simultâneos | Ilimitado |
-| Real-time | Incluído |
-| Restrição | Projeto pausa após 1 semana sem uso |
+1. Crie um projeto gratuito no Supabase.
+2. Crie as tabelas `tickets` e `history` (campos: `id`, `conv_id`, `title`, `theme`, `assignee`, `team`, `preview`, `state`, `added_at`; em `history`, adicione também `removed_at`) e a tabela `meta` (`key`, `value`) usada para a data de última atualização.
+3. Configure as políticas de acesso (RLS) e a autenticação de acordo com a sua necessidade.
+4. No `index.html`, ajuste as constantes de configuração:
+   ```js
+   const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+   const SUPABASE_KEY = 'SUA_CHAVE_ANON_PUBLIC';
+   const ALLOWED_DOMAIN = 'suaempresa.com'; // vazio = qualquer conta autenticada
+   ```
+5. Publique no GitHub Pages: **Settings → Pages → Branch: main → Save**.
 
-> Para reativar: basta abrir o Supabase dashboard e clicar em "Restore".
+## 📥 Formato do JSON de importação
+
+```json
+{
+  "tickets": [
+    {
+      "ticket_id": "100001",
+      "conv_id": "abc123",
+      "title": "[Pedidos] Descrição do problema",
+      "assignee": "Nome",
+      "team": "Tech",
+      "preview": "Última atividade",
+      "state": "open"
+    }
+  ]
+}
+```
+
+O tema é identificado pelo prefixo entre colchetes no título (ex.: `[Impressão]`).
+
+## 🗺️ Ideias futuras
+
+- Atualização automática, sem importação manual
+- Filtro por tema direto na barra superior
+- Métricas de tempo médio de resolução
+
+## 👤 Autor
+
+**Gabriel da Maia**, Suporte.
+Sugestões e feedbacks são bem-vindos! Abra uma *issue* ou entre em contato.
