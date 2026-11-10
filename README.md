@@ -8,7 +8,7 @@ Kanban web para dar visibilidade aos problemas reportados por clientes e já val
 
 ## 📌 Sobre
 
-O **Bug - Hunter** nasceu para responder a uma pergunta simples: *"esse problema já é conhecido?"*
+O **Bug Hunter** nasceu para responder a uma pergunta simples: *"esse problema já é conhecido?"*
 
 Os tickets que passam pela triagem do Suporte e são validados como falhas reais entram no board, agrupados por tema (Financeiro, Pedidos, Impressão, Integrações, etc.). Assim, qualquer pessoa autorizada consegue consultar o que está em análise sem precisar abrir um novo chamado.
 
@@ -22,16 +22,16 @@ Os tickets que passam pela triagem do Suporte e são validados como falhas reais
   - ticket já no board → ignorado
   - ticket já arquivado que voltou → aviso para decisão manual
   - título idêntico a um problema antigo → aviso de possível recorrência
-- **Arquivados**: histórico de tickets resolvidos, com opção de restaurar.
+- **Tickets finalizados**: visão separada (fundo verde animado) com os problemas já resolvidos, mantendo busca e filtros por assunto; quem tem permissão de edição pode restaurar um ticket.
 - **Última atualização**: rodapé com data e horário da última vez que o board foi alimentado.
 - **Modal explicativo**: botão ao lado do título que apresenta o projeto e como usá-lo.
-- **Controle de acesso**: login e permissões diferentes para quem consulta e para quem edita.
+- **Controle de acesso**: login exclusivo com conta Google corporativa; permissões diferentes para quem consulta e para quem edita.
 
 ## 🧱 Stack
 
 | Camada | Tecnologia |
 |---|---|
-| Front-end | HTML, CSS e JavaScript puro (arquivo único, sem build) |
+| Front-end | HTML, CSS e JavaScript puro (sem build); biblioteca `supabase-js` com versão fixa, embutida no próprio `index.html` (sem CDN) |
 | Backend / banco | [Supabase](https://supabase.com) (PostgreSQL + Auth + Realtime) |
 | Hospedagem | GitHub Pages |
 
@@ -44,7 +44,7 @@ GitHub Pages (index.html) ──HTTPS──> Supabase (PostgreSQL + Auth + Realt
 ## 🚀 Como rodar o seu próprio
 
 1. Crie um projeto gratuito no Supabase.
-2. Crie as tabelas `tickets` e `history` (campos: `id`, `conv_id`, `title`, `theme`, `assignee`, `team`, `preview`, `state`, `added_at`; em `history`, adicione também `removed_at`) e a tabela `meta` (`key`, `value`) usada para a data de última atualização.
+2. Crie as tabelas `tickets` e `history` (campos: `id`, `conv_id`, `title`, `theme`, `state`, `added_at`; em `history`, adicione também `removed_at`) e a tabela `meta` (`key`, `value`) usada para a data de última atualização.
 3. Configure as políticas de acesso (RLS) e a autenticação de acordo com a sua necessidade.
 4. No `index.html`, ajuste as constantes de configuração:
    ```js
@@ -63,16 +63,13 @@ GitHub Pages (index.html) ──HTTPS──> Supabase (PostgreSQL + Auth + Realt
       "ticket_id": "100001",
       "conv_id": "abc123",
       "title": "[Pedidos] Descrição do problema",
-      "assignee": "Nome",
-      "team": "Tech",
-      "preview": "Última atividade",
       "state": "open"
     }
   ]
 }
 ```
 
-O tema é identificado pelo prefixo entre colchetes no título (ex.: `[Impressão]`).
+O tema é identificado pelo prefixo entre colchetes no título (ex.: `[Impressão]`). Por privacidade, apenas os campos acima são lidos; qualquer outro campo do JSON (como responsável ou resumo da conversa) é ignorado.
 
 ## 🗺️ Ideias futuras
 
